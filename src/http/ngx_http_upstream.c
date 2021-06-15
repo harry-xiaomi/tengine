@@ -555,6 +555,13 @@ ngx_http_upstream_init(ngx_http_request_t *r)
     }
 #endif
 
+#if (NGX_HTTP_V3)
+    if (r->qstream) {
+        ngx_http_upstream_init_request(r);
+        return;
+    }
+#endif
+
     if (c->read->timer_set) {
         ngx_del_timer(c->read);
     }
@@ -1417,6 +1424,12 @@ ngx_http_upstream_check_broken_connection(ngx_http_request_t *r,
 
 #if (NGX_HTTP_V2)
     if (r->stream) {
+        return;
+    }
+#endif
+
+#if (NGX_HTTP_V3)
+    if (r->qstream) {
         return;
     }
 #endif

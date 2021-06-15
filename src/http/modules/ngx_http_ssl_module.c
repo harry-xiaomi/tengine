@@ -415,7 +415,7 @@ ngx_http_ssl_alpn_select(ngx_ssl_conn_t *ssl_conn, const unsigned char **out,
 #if (NGX_DEBUG)
     unsigned int            i;
 #endif
-#if (NGX_HTTP_V2)
+#if (NGX_HTTP_V2 || NGX_HTTP_V3)
     ngx_http_connection_t  *hc;
 #if (T_NGX_HTTP2_SRV_ENABLE)
     ngx_http_v2_srv_conf_t *h2scf;
@@ -435,9 +435,11 @@ ngx_http_ssl_alpn_select(ngx_ssl_conn_t *ssl_conn, const unsigned char **out,
     }
 #endif
 
-#if (NGX_HTTP_V2)
+#if (NGX_HTTP_V2 || NGX_HTTP_V3)
     hc = c->data;
+#endif
 
+#if (NGX_HTTP_V2)
 #if (T_NGX_HTTP2_SRV_ENABLE)
     h2scf = ngx_http_get_module_srv_conf(hc->conf_ctx, ngx_http_v2_module);
 #endif
@@ -455,6 +457,13 @@ ngx_http_ssl_alpn_select(ngx_ssl_conn_t *ssl_conn, const unsigned char **out,
         srv =
            (unsigned char *) NGX_HTTP_V2_ALPN_ADVERTISE NGX_HTTP_NPN_ADVERTISE;
         srvlen = sizeof(NGX_HTTP_V2_ALPN_ADVERTISE NGX_HTTP_NPN_ADVERTISE) - 1;
+
+    } else
+#endif
+#if (NGX_HTTP_V3)
+    if (hc->addr_conf->quic) {
+        srv = (unsigned char *) QUICHE_H3_APPLICATION_PROTOCOL;
+        srvlen = sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1;
 
     } else
 #endif
